@@ -51,7 +51,9 @@ const mediaConfig = [
   },
   {
     "type": "video",
-    "src": "/media/video4.mp4"
+    "src": "/media/video4.mp4",
+    "unmute": true,
+    "caption": "Make a wish!"
   },
   {
     "type": "text",
@@ -64,9 +66,7 @@ const mediaConfig = [
   },
   {
     "type": "video",
-    "src": "/media/video5.mp4",
-    "unmute": true,
-    "caption": "Make a wish!"
+    "src": "/media/video5.mp4"
   },
   {
     "type": "photo",
@@ -89,6 +89,35 @@ const mediaConfig = [
   {
     "type": "video",
     "src": "/media/video7.mp4"
+  },
+  {
+    "type": "photo",
+    "src": "/media/photo8.jpeg",
+    "caption": ""
+  },
+  {
+    "type": "video",
+    "src": "/media/video8.mp4"
+  },
+  {
+    "type": "text",
+    "message": "No one in this world can love you more than your mother..."
+  },
+  {
+    "type": "video",
+    "src": "/media/video9.mp4"
+  },
+  {
+    "type": "video",
+    "src": "/media/video10.mp4"
+  },
+  {
+    "type": "video",
+    "src": "/media/video11.mp4"
+  },
+  {
+    "type": "video",
+    "src": "/media/video12.mp4"
   }
 ];
 
