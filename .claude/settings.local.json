@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node sync-media.js --no-watch)",
+      "Bash(ls app/public/media/*.mp4)",
+      "Bash(ls app/public/media/*.mp3)"
+    ]
+  }
+}

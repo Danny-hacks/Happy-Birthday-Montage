@@ -17,7 +17,7 @@ A cinematic, scroll-driven birthday montage website built with **React + Vite**.
 - **Swipe prompt** — Animated hint tells the viewer to scroll/swipe to begin
 - **Progress bar** — Gold gradient bar at the top shows scroll progress
 - **Text interludes** — Inspirational quotes appear between media with word-by-word animation
-- **Drag & drop media sync** — Just drop files into the `media/` folder and they auto-sync to the site (no manual steps)
+- **Drag & drop media sync** — Just drop files into `app/public/media/` and run the sync script
 
 ## 🚀 Getting Started
 
@@ -30,7 +30,7 @@ A cinematic, scroll-driven birthday montage website built with **React + Vite**.
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/Happy-Birthday-Montage.git
+git clone https://github.com/Danny-hacks/Happy-Birthday-Montage.git
 cd Happy-Birthday-Montage
 
 # Install dependencies
@@ -40,7 +40,7 @@ npm install
 
 ### Add Your Media
 
-Drop your files into the root `media/` folder:
+Drop your files into `app/public/media/`:
 
 | File Type | Supported Formats |
 |-----------|-------------------|
@@ -59,7 +59,15 @@ cd app
 npm run dev
 ```
 
-The dev server watches the `media/` folder. Drop in new files and the site updates automatically — no restart needed.
+The Vite build auto-syncs media on startup. You can also run the sync manually or in watch mode:
+
+```bash
+# One-time sync
+node sync-media.js --no-watch
+
+# Watch mode (auto-syncs on file changes, default)
+node sync-media.js
+```
 
 ### Customize Content
 
@@ -98,19 +106,18 @@ Every push triggers a new deploy automatically.
 
 ```
 Happy-Birthday-Montage/
-├── media/                  # ← Drop your photos, videos & audio here
-│   ├── photo1.jpeg
-│   ├── video1.mp4
-│   └── bg-music.mp3
 ├── app/
-│   ├── public/media/       # Auto-synced copy (don't edit directly)
+│   ├── public/media/       # ← Drop your photos, videos & audio here
+│   │   ├── photo1.jpeg
+│   │   ├── video1.mp4
+│   │   └── bg-music.mp3
 │   ├── src/
 │   │   ├── App.jsx         # Main app component
 │   │   ├── App.css         # All styles
 │   │   └── mediaConfig.js  # Auto-generated media config
-│   ├── vite.config.js      # Vite config with auto-sync plugin
+│   ├── vite.config.js      # Vite config with build-time sync
 │   └── package.json
-├── sync-media.js           # Media sync script (auto-rename & copy)
+├── sync-media.js           # Media sync script (rename & generate config)
 ├── netlify.toml            # Netlify deployment config
 └── README.md
 ```
@@ -119,22 +126,13 @@ Happy-Birthday-Montage/
 
 The `sync-media.js` script handles all media management:
 
-```bash
-# One-time sync
-node sync-media.js --no-watch
-
-# Watch mode (default when run without flags)
-node sync-media.js
-```
-
 **What it does:**
-1. Scans the `media/` folder for photos, videos, and audio
+1. Scans `app/public/media/` for photos, videos, and audio
 2. Renames files sequentially (`photo1.jpeg`, `video1.mp4`, etc.)
-3. Copies everything to `app/public/media/`
-4. Regenerates `mediaConfig.js` with interleaved photos, videos, and text breaks
-5. Preserves any captions or unmute flags you've set
+3. Regenerates `mediaConfig.js` with interleaved photos, videos, and text breaks
+4. Preserves any captions or unmute flags you've set
 
-**During development**, the Vite plugin runs this automatically — no need to call it manually.
+**During builds** (including Netlify deploys), the Vite plugin runs this automatically.
 
 ## 🎨 Customization
 

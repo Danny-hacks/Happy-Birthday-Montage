@@ -4,22 +4,20 @@
  * Run: node sync-media.js
  *
  * What it does:
- *   1. Scans the /media folder
+ *   1. Scans app/public/media/ for photos, videos, and audio
  *   2. Renames photos → photo1.jpeg, photo2.jpeg, ...
  *   3. Renames videos → video1.mp4, video2.mp4, ...
- *   4. Keeps audio files as bg-music (first .mp3 found)
- *   5. Copies everything to app/public/media/
- *   6. Regenerates app/src/mediaConfig.js
+ *   4. Renames first audio → bg-music.mp3
+ *   5. Regenerates app/src/mediaConfig.js
  *
- * Just drag & drop files into /media and run this script!
+ * Just drag & drop files into app/public/media/ and the site updates!
  */
 
 const fs = require("fs");
 const path = require("path");
 
 const ROOT = __dirname;
-const MEDIA_DIR = path.join(ROOT, "media");
-const PUBLIC_MEDIA = path.join(ROOT, "app", "public", "media");
+const MEDIA_DIR = path.join(ROOT, "app", "public", "media");
 const CONFIG_PATH = path.join(ROOT, "app", "src", "mediaConfig.js");
 
 const IMAGE_EXTS = [".jpeg", ".jpg", ".png", ".webp"];
@@ -35,16 +33,12 @@ function getFileType(filename) {
 }
 
 function run() {
-  // Ensure directories exist
-  if (!fs.existsSync(MEDIA_DIR)) {
-    console.log("No media/ folder found. Create one and add your files.");
-    return;
-  }
-  fs.mkdirSync(PUBLIC_MEDIA, { recursive: true });
+  // Ensure directory exists
+  fs.mkdirSync(MEDIA_DIR, { recursive: true });
 
   // Read all files
   const files = fs.readdirSync(MEDIA_DIR).filter((f) => {
-    return fs.statSync(path.join(MEDIA_DIR, f)).isFile();
+    return fs.statSync(path.join(MEDIA_DIR, f)).isFile() && !f.startsWith("_tmp_");
   });
 
   // Categorize
@@ -70,77 +64,6 @@ function run() {
 
   console.log(`Found: ${photos.length} photos, ${videos.length} videos, ${audioFile ? 1 : 0} audio`);
 
-  // Clear public media folder
-  const existing = fs.readdirSync(PUBLIC_MEDIA);
-  for (const f of existing) {
-    fs.unlinkSync(path.join(PUBLIC_MEDIA, f));
-  }
-
-  // Rename & copy photos
-  const photoMap = [];
-  photos.forEach((file, i) => {
-    const ext = path.extname(file).toLowerCase();
-    const newName = `photo${i + 1}${ext}`;
-    const oldPath = path.join(MEDIA_DIR, file);
-    const renamedPath = path.join(MEDIA_DIR, newName);
-    const publicPath = path.join(PUBLIC_MEDIA, newName);
-
-    // Rename in media folder (skip if already named correctly)
-    if (file !== newName) {
-      // Avoid collision: rename to temp first if target exists
-      if (fs.existsSync(renamedPath)) {
-        const tmpName = `_tmp_${newName}`;
-        fs.renameSync(oldPath, path.join(MEDIA_DIR, tmpName));
-        fs.renameSync(path.join(MEDIA_DIR, tmpName), renamedPath);
-      } else {
-        fs.renameSync(oldPath, renamedPath);
-      }
-      console.log(`  ${file} → ${newName}`);
-    }
-
-    fs.copyFileSync(renamedPath, publicPath);
-    photoMap.push(newName);
-  });
-
-  // Rename & copy videos
-  const videoMap = [];
-  videos.forEach((file, i) => {
-    const ext = path.extname(file).toLowerCase();
-    const newName = `video${i + 1}${ext}`;
-    const oldPath = path.join(MEDIA_DIR, file);
-    const renamedPath = path.join(MEDIA_DIR, newName);
-    const publicPath = path.join(PUBLIC_MEDIA, newName);
-
-    if (file !== newName) {
-      if (fs.existsSync(renamedPath)) {
-        const tmpName = `_tmp_${newName}`;
-        fs.renameSync(oldPath, path.join(MEDIA_DIR, tmpName));
-        fs.renameSync(path.join(MEDIA_DIR, tmpName), renamedPath);
-      } else {
-        fs.renameSync(oldPath, renamedPath);
-      }
-      console.log(`  ${file} → ${newName}`);
-    }
-
-    fs.copyFileSync(renamedPath, publicPath);
-    videoMap.push(newName);
-  });
-
-  // Copy audio
-  if (audioFile) {
-    const audioSrc = path.join(MEDIA_DIR, audioFile);
-    const audioDst = path.join(PUBLIC_MEDIA, "bg-music.mp3");
-    if (audioFile !== "bg-music.mp3") {
-      const renamedAudio = path.join(MEDIA_DIR, "bg-music.mp3");
-      fs.renameSync(audioSrc, renamedAudio);
-      console.log(`  ${audioFile} → bg-music.mp3`);
-      fs.copyFileSync(renamedAudio, audioDst);
-    } else {
-      fs.copyFileSync(audioSrc, audioDst);
-    }
-  }
-
-  // Generate mediaConfig.js
   // Read existing config to preserve unmute flags and captions
   let existingConfig = [];
   try {
@@ -151,13 +74,64 @@ function run() {
     }
   } catch {}
 
-  // Build lookup for existing captions/unmute by src
   const existingLookup = {};
   for (const item of existingConfig) {
     if (item.src) existingLookup[item.src] = item;
   }
 
-  // Interleave photos and videos nicely, with text breaks
+  // Phase 1: rename all to temp names to avoid collisions
+  const photoRenames = [];
+  photos.forEach((file, i) => {
+    const ext = path.extname(file).toLowerCase();
+    const newName = `photo${i + 1}${ext}`;
+    if (file !== newName) {
+      const tmpName = `_tmp_photo_${i + 1}${ext}`;
+      fs.renameSync(path.join(MEDIA_DIR, file), path.join(MEDIA_DIR, tmpName));
+      photoRenames.push({ tmp: tmpName, final: newName, old: file });
+    } else {
+      photoRenames.push(null);
+    }
+  });
+
+  const videoRenames = [];
+  videos.forEach((file, i) => {
+    const ext = path.extname(file).toLowerCase();
+    const newName = `video${i + 1}${ext}`;
+    if (file !== newName) {
+      const tmpName = `_tmp_video_${i + 1}${ext}`;
+      fs.renameSync(path.join(MEDIA_DIR, file), path.join(MEDIA_DIR, tmpName));
+      videoRenames.push({ tmp: tmpName, final: newName, old: file });
+    } else {
+      videoRenames.push(null);
+    }
+  });
+
+  // Phase 2: rename temps to final names
+  for (const r of photoRenames) {
+    if (r) {
+      fs.renameSync(path.join(MEDIA_DIR, r.tmp), path.join(MEDIA_DIR, r.final));
+      console.log(`  ${r.old} → ${r.final}`);
+    }
+  }
+
+  for (const r of videoRenames) {
+    if (r) {
+      fs.renameSync(path.join(MEDIA_DIR, r.tmp), path.join(MEDIA_DIR, r.final));
+      console.log(`  ${r.old} → ${r.final}`);
+    }
+  }
+
+  // Rename audio
+  if (audioFile && audioFile !== "bg-music.mp3") {
+    fs.renameSync(path.join(MEDIA_DIR, audioFile), path.join(MEDIA_DIR, "bg-music.mp3"));
+    console.log(`  ${audioFile} → bg-music.mp3`);
+  }
+
+  // Build final file lists
+  const photoMap = photos.map((_, i) => `photo${i + 1}${path.extname(photos[i]).toLowerCase()}`);
+  const videoMap = videos.map((_, i) => `video${i + 1}${path.extname(videos[i]).toLowerCase()}`);
+
+  // Interleave photos and videos with text breaks
   const entries = [];
   const totalPhotos = photoMap.length;
   const totalVideos = videoMap.length;
@@ -174,9 +148,8 @@ function run() {
   ];
   let ti = 0;
 
-  // Pattern: photo, video, photo, text, photo, video, photo, text...
+  // Pattern: photo, video, photo, video, text, repeat
   while (pi < totalPhotos || vi < totalVideos) {
-    // Add a photo
     if (pi < totalPhotos) {
       const src = `/media/${photoMap[pi]}`;
       const existing = existingLookup[src];
@@ -188,7 +161,6 @@ function run() {
       pi++;
     }
 
-    // Add a video
     if (vi < totalVideos) {
       const src = `/media/${videoMap[vi]}`;
       const existing = existingLookup[src];
@@ -201,7 +173,6 @@ function run() {
       vi++;
     }
 
-    // Add a text interlude every 2-3 items
     if ((pi + vi) % 4 === 0 && ti < textMessages.length && (pi < totalPhotos || vi < totalVideos)) {
       entries.push({
         type: "text",
@@ -214,7 +185,7 @@ function run() {
   const configContent = `/**
  * MEDIA CONFIGURATION (auto-generated by sync-media.js)
  *
- * To update: add/remove files from /media and run: node sync-media.js
+ * To update: drop files into app/public/media/ and run: node sync-media.js
  *
  * To customize:
  *   - Edit captions below
@@ -240,17 +211,16 @@ run();
 // ── Watch mode (default, use --no-watch to disable) ──
 if (!process.argv.includes("--no-watch")) {
   let debounce = null;
-  console.log("\nWatching media/ folder for changes... (Ctrl+C to stop)");
+  console.log("\nWatching app/public/media/ for changes... (Ctrl+C to stop)");
 
-  fs.watch(MEDIA_DIR, { persistent: true }, (eventType, filename) => {
+  fs.watch(MEDIA_DIR, { persistent: true }, (_eventType, filename) => {
     if (!filename) return;
-    // Ignore temp files
     if (filename.startsWith("_tmp_")) return;
 
     clearTimeout(debounce);
     debounce = setTimeout(() => {
       console.log(`\n--- Change detected: ${filename} ---`);
       run();
-    }, 800); // wait 800ms for drag-and-drop batches to finish
+    }, 800);
   });
 }
