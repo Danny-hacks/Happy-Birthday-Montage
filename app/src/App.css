@@ -359,19 +359,24 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  padding: 0.4rem 0.9rem;
-  background: rgba(0,0,0,0.65);
+  padding: 0.55rem 1.1rem;
+  background: rgba(0,0,0,0.85);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(212,160,85,0.35);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(212,160,85,0.5);
   border-radius: 24px;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--gold-light);
   letter-spacing: 0.1em;
-  z-index: 5;
+  z-index: 10;
   display: flex;
   align-items: center;
   text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 16px rgba(212,160,85,0.25);
 }
 
 .video-caption {

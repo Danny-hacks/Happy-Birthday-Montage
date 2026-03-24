@@ -11,15 +11,37 @@ function useAudio() {
   const playingRef = useRef(false);
   const duckedRef = useRef(false);
 
-  const start = useCallback(() => {
+  const init = useCallback(() => {
     if (!audioRef.current) {
-      audioRef.current = new Audio("/media/bg-music.mp3");
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.35;
+      const a = new Audio();
+      a.src = "/media/bg-music.mp3";
+      a.loop = true;
+      a.volume = 0.35;
+      a.preload = "auto";
+      // iOS needs webkit audio session hint
+      a.setAttribute("playsinline", "");
+      audioRef.current = a;
     }
-    playingRef.current = true;
-    audioRef.current.play().catch(() => {});
   }, []);
+
+  const start = useCallback(() => {
+    init();
+    playingRef.current = true;
+    // iOS: must be called directly in user gesture handler
+    const playPromise = audioRef.current.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        // Retry once on next user interaction
+        const retry = () => {
+          audioRef.current.play().catch(() => {});
+          document.removeEventListener("touchstart", retry);
+          document.removeEventListener("click", retry);
+        };
+        document.addEventListener("touchstart", retry, { once: true });
+        document.addEventListener("click", retry, { once: true });
+      });
+    }
+  }, [init]);
 
   const stop = useCallback(() => {
     playingRef.current = false;
@@ -304,25 +326,42 @@ function VideoSection({ src, caption, unmute }) {
   const appeared = useRef(false);
   const sectionInView = useInView(ref, { once: true, amount: 0.2 });
   const audio = useContext(AudioContext_);
+  const [soundActive, setSoundActive] = useState(false);
 
   useEffect(() => {
     if (!videoRef.current) return;
     if (inView) {
       appeared.current = true;
-      if (unmute) {
-        videoRef.current.muted = false;
-        audio?.duck();
-      }
-      videoRef.current.play().catch(() => {});
+      // Always start muted for autoplay (iOS requirement)
+      videoRef.current.muted = true;
+      videoRef.current.play().then(() => {
+        // After play starts, unmute if flagged (works because user tapped splash)
+        if (unmute) {
+          videoRef.current.muted = false;
+          setSoundActive(true);
+          audio?.duck();
+        }
+      }).catch(() => {});
     } else if (appeared.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
       if (unmute) {
         videoRef.current.muted = true;
+        setSoundActive(false);
         audio?.unduck();
       }
     }
   }, [inView, unmute, audio]);
+
+  // Tap to toggle sound on iOS if autoplay unmute fails
+  const handleTap = () => {
+    if (!unmute || !videoRef.current) return;
+    const isMuted = videoRef.current.muted;
+    videoRef.current.muted = !isMuted;
+    setSoundActive(isMuted);
+    if (isMuted) audio?.duck();
+    else audio?.unduck();
+  };
 
   return (
     <section className="section video-section" ref={ref}>
@@ -335,13 +374,15 @@ function VideoSection({ src, caption, unmute }) {
         {unmute && (
           <motion.div
             className="video-sound-badge"
-            animate={{ opacity: [0.6, 1, 0.6] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            onClick={handleTap}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#d4a055" style={{ marginRight: 5 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#d4a055" style={{ marginRight: 6 }}>
               <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0012 8.5v1.5a3 3 0 010 4V15.5a4.5 4.5 0 004.5-3.5z" />
             </svg>
-            Sound on
+            {soundActive ? "Sound on" : "Tap for sound"}
           </motion.div>
         )}
         <video
@@ -350,6 +391,7 @@ function VideoSection({ src, caption, unmute }) {
           muted
           playsInline
           preload="metadata"
+          onClick={handleTap}
         />
         {caption && <div className="video-caption">{caption}</div>}
       </motion.div>
