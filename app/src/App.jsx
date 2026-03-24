@@ -139,7 +139,7 @@ function Splash({ onStart }) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ delay: 0.3, duration: 1.2, ease: "easeOut" }}
       >
-        Happy Birthday Mum
+        Happy Birthday Mum!🎉
       </motion.h1>
       <motion.p
         className="splash-subtitle"
