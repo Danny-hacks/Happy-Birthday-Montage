@@ -11,114 +11,45 @@
  */
 
 const mediaConfig = [
-  {
-    "type": "photo",
-    "src": "/media/photo1.jpeg",
-    "caption": ""
-  },
-  {
-    "type": "video",
-    "src": "/media/video1.mp4"
-  },
-  {
-    "type": "photo",
-    "src": "/media/photo2.jpeg",
-    "caption": ""
-  },
-  {
-    "type": "video",
-    "src": "/media/video2.mp4"
-  },
-  {
-    "type": "text",
-    "message": "Every moment with you is a blessing we treasure forever..."
-  },
-  {
-    "type": "photo",
-    "src": "/media/photo3.jpeg",
-    "caption": ""
-  },
-  {
-    "type": "video",
-    "src": "/media/video3.mp4",
-    "unmute": true,
-    "caption": "Happy Birthday to you!"
-  },
-  {
-    "type": "photo",
-    "src": "/media/photo4.jpeg",
-    "caption": ""
-  },
-  {
-    "type": "video",
-    "src": "/media/video4.mp4",
-    "unmute": true,
-    "caption": "Make a wish!"
-  },
-  {
-    "type": "text",
-    "message": "Your love lights up every room you walk into..."
-  },
-  {
-    "type": "photo",
-    "src": "/media/photo5.jpeg",
-    "caption": ""
-  },
-  {
-    "type": "video",
-    "src": "/media/video5.mp4"
-  },
-  {
-    "type": "photo",
-    "src": "/media/photo6.jpeg",
-    "caption": ""
-  },
-  {
-    "type": "video",
-    "src": "/media/video6.mp4"
-  },
-  {
-    "type": "text",
-    "message": "A mother's love is the fuel that enables a normal human being to do the impossible..."
-  },
-  {
-    "type": "photo",
-    "src": "/media/photo7.jpeg",
-    "caption": ""
-  },
-  {
-    "type": "video",
-    "src": "/media/video7.mp4"
-  },
-  {
-    "type": "photo",
-    "src": "/media/photo8.jpeg",
-    "caption": ""
-  },
-  {
-    "type": "video",
-    "src": "/media/video8.mp4"
-  },
-  {
-    "type": "text",
-    "message": "No one in this world can love you more than your mother..."
-  },
-  {
-    "type": "video",
-    "src": "/media/video9.mp4"
-  },
-  {
-    "type": "video",
-    "src": "/media/video10.mp4"
-  },
-  {
-    "type": "video",
-    "src": "/media/video11.mp4"
-  },
-  {
-    "type": "video",
-    "src": "/media/video12.mp4"
-  }
+  // ── Opening ──
+  { "type": "photo", "src": "/media/photo1.jpeg", "caption": "" },
+  { "type": "video", "src": "/media/video1.mp4" },
+
+  { "type": "photo", "src": "/media/photo2.jpeg", "caption": "" },
+  { "type": "video", "src": "/media/video2.mp4" },
+
+  { "type": "text", "message": "Every moment with you is a blessing we treasure forever..." },
+
+  // ── Middle ──
+  { "type": "photo", "src": "/media/photo3.jpeg", "caption": "" },
+  { "type": "video", "src": "/media/video5.mp4" },
+
+  { "type": "photo", "src": "/media/photo4.jpeg", "caption": "" },
+  { "type": "video", "src": "/media/video6.mp4" },
+
+  { "type": "text", "message": "Your love lights up every room you walk into..." },
+
+  { "type": "photo", "src": "/media/photo5.jpeg", "caption": "" },
+  { "type": "video", "src": "/media/video7.mp4" },
+
+  { "type": "photo", "src": "/media/photo6.jpeg", "caption": "" },
+  { "type": "video", "src": "/media/video8.mp4" },
+
+  { "type": "text", "message": "A mother's love is the fuel that enables a normal human being to do the impossible..." },
+
+  { "type": "photo", "src": "/media/photo7.jpeg", "caption": "" },
+  { "type": "video", "src": "/media/video9.mp4" },
+
+  { "type": "video", "src": "/media/video10.mp4" },
+  { "type": "video", "src": "/media/video11.mp4" },
+  { "type": "video", "src": "/media/video12.mp4" },
+
+  { "type": "text", "message": "No one in this world can love you more than your mother..." },
+
+  // ── Grand finale ──
+  { "type": "photo", "src": "/media/photo8.jpeg", "caption": "" },
+  { "type": "video", "src": "/media/video3.mp4", "unmute": true, "caption": "Happy Birthday to you!" },
+  { "type": "video", "src": "/media/video4.mp4", "unmute": true, "caption": "Make a wish!" }
 ];
 
 export default mediaConfig;
