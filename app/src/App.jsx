@@ -319,7 +319,7 @@ function PhotoSection({ src, caption, index }) {
 }
 
 /* ── Video Section ── */
-function VideoSection({ src, caption, unmute }) {
+function VideoSection({ src, caption, unmute, index = 0 }) {
   const ref = useRef(null);
   const videoRef = useRef(null);
   const inView = useInView(ref, { amount: 0.5 });
@@ -327,6 +327,15 @@ function VideoSection({ src, caption, unmute }) {
   const sectionInView = useInView(ref, { once: true, amount: 0.2 });
   const audio = useContext(AudioContext_);
   const [soundActive, setSoundActive] = useState(false);
+
+  const directions = ["bottom", "left", "right", "bottom", "right"];
+  const dir = directions[index % 5];
+  const enterAnim = {
+    opacity: 0,
+    x: dir === "left" ? -60 : dir === "right" ? 60 : 0,
+    y: dir === "bottom" ? 60 : 20,
+    scale: 0.92,
+  };
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -367,8 +376,8 @@ function VideoSection({ src, caption, unmute }) {
     <section className="section video-section" ref={ref}>
       <motion.div
         className={`video-frame ${unmute ? "video-frame--featured" : ""}`}
-        initial={{ opacity: 0, y: 60, scale: 0.92 }}
-        animate={sectionInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+        initial={enterAnim}
+        animate={sectionInView ? { opacity: 1, x: 0, y: 0, scale: 1 } : {}}
         transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
       >
         {unmute && (
@@ -594,6 +603,7 @@ export default function App() {
   };
 
   let photoIndex = 0;
+  let videoIndex = 0;
 
   return (
     <AudioContext_.Provider value={audio}>
@@ -640,7 +650,8 @@ export default function App() {
               return <PhotoSection key={i} src={item.src} caption={item.caption} index={pi} />;
             }
             if (item.type === "video") {
-              return <VideoSection key={i} src={item.src} caption={item.caption} unmute={item.unmute} />;
+              const vi = videoIndex++;
+              return <VideoSection key={i} src={item.src} caption={item.caption} unmute={item.unmute} index={vi} />;
             }
             if (item.type === "text") {
               return <TextSection key={i} message={item.message} />;

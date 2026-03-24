@@ -324,6 +324,12 @@
    ══════════════════════════════════════ */
 .video-section {
   background: #080503;
+  padding: 4rem 0;
+}
+
+.video-section + .video-section {
+  padding-top: 2rem;
+  min-height: 90vh;
 }
 
 .video-frame {
