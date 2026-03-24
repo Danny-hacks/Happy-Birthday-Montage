@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday Mum!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #d4a055;
+    --gold-light: #f0d4a8;
+    --warm-dark: #1a0e05;
+    --warm-mid: #2d1810;
+    --cream: #faf3e8;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+    overflow-x: hidden;
+  }
+
+  body {
+    background: var(--warm-dark);
+    color: var(--cream);
+    font-family: 'Cormorant Garamond', serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Splash / Play Screen ── */
+  #splash {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: radial-gradient(ellipse at center, var(--warm-mid), var(--warm-dark));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  #splash h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 1.2s ease forwards 0.3s;
+  }
+
+  #splash .subtitle {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--gold-light);
+    opacity: 0;
+    animation: fadeUp 1.2s ease forwards 0.8s;
+    margin-bottom: 3rem;
+    font-style: italic;
+  }
+
+  #playBtn {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    border: 3px solid var(--gold);
+    background: rgba(212,160,85,0.15);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 1.4s, pulse 2s ease-in-out infinite 2.4s;
+    transition: background 0.3s, transform 0.3s;
+  }
+  #playBtn:hover { background: rgba(212,160,85,0.35); transform: scale(1.1); }
+  #playBtn svg { margin-left: 6px; }
+
+  #splash .tap-hint {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: rgba(240,212,168,0.5);
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 1.8s;
+  }
+
+  /* ── Sections ── */
+  .section {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ── Hero Section ── */
+  #hero {
+    background: radial-gradient(ellipse at 50% 40%, rgba(212,160,85,0.15), transparent 70%),
+                var(--warm-dark);
+  }
+
+  #hero .hero-content {
+    text-align: center;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+    padding: 2rem;
+  }
+  #hero .hero-content.visible { opacity: 1; transform: translateY(0); }
+
+  #hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    color: var(--gold);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  #hero .hero-year {
+    font-size: clamp(1rem, 3vw, 1.8rem);
+    color: var(--gold-light);
+    letter-spacing: 0.3em;
+    font-weight: 300;
+  }
+
+  .divider {
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+    margin: 1.5rem auto;
+    opacity: 0.6;
+  }
+
+  /* ── Photo Sections ── */
+  .photo-section {
+    background: var(--warm-dark);
+  }
+
+  .photo-frame {
+    position: relative;
+    width: 85vw;
+    max-width: 600px;
+    aspect-ratio: auto;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+  .photo-frame.visible { opacity: 1; transform: scale(1); }
+
+  .photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    animation: kenBurns 20s ease-in-out infinite alternate;
+  }
+
+  .photo-frame .caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem 1.5rem 1.5rem;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  /* ── Video Sections ── */
+  .video-section {
+    background: #000;
+  }
+
+  .video-frame {
+    position: relative;
+    width: 90vw;
+    max-width: 700px;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+  .video-frame.visible { opacity: 1; transform: translateY(0); }
+
+  .video-frame video {
+    width: 100%;
+    display: block;
+    border-radius: 8px;
+  }
+
+  /* ── Text Interlude ── */
+  .text-section {
+    background: radial-gradient(ellipse at center, rgba(212,160,85,0.08), transparent 70%),
+                var(--warm-dark);
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .text-section .message {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+    color: var(--gold-light);
+    max-width: 650px;
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+    font-style: italic;
+  }
+  .text-section .message.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── Finale ── */
+  #finale {
+    background: radial-gradient(ellipse at 50% 50%, rgba(212,160,85,0.2), transparent 60%),
+                var(--warm-dark);
+    text-align: center;
+    padding: 2rem;
+    flex-direction: column;
+  }
+
+  #finale .finale-text {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+  #finale .finale-text.visible { opacity: 1; transform: translateY(0); }
+
+  #finale h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+
+  #finale p {
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: var(--gold-light);
+    max-width: 550px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .hearts {
+    margin-top: 2rem;
+    font-size: 2rem;
+    color: var(--gold);
+    opacity: 0;
+    animation: none;
+  }
+  .hearts.visible {
+    opacity: 1;
+    animation: heartbeat 1.5s ease-in-out infinite;
+  }
+
+  /* ── Floating Particles ── */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    animation: float-up linear infinite;
+  }
+
+  /* ── Audio Toggle ── */
+  #audioToggle {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 500;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: rgba(26,14,5,0.8);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s, background 0.3s;
+  }
+  #audioToggle.show { opacity: 1; }
+  #audioToggle:hover { background: rgba(212,160,85,0.3); }
+  #audioToggle svg { fill: var(--gold); }
+
+  /* ── Scroll Progress ── */
+  #progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    z-index: 999;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212,160,85,0.4); }
+    50% { box-shadow: 0 0 0 20px rgba(212,160,85,0); }
+  }
+
+  @keyframes kenBurns {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.15) translate(-2%, -2%); }
+  }
+
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.15); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.1); }
+  }
+
+  @keyframes float-up {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .photo-frame { width: 92vw; }
+    .video-frame { width: 95vw; }
+    #playBtn { width: 70px; height: 70px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div id="splash">
+  <h1>Happy Birthday Mum</h1>
+  <p class="subtitle">A celebration of you</p>
+  <button id="playBtn" aria-label="Play">
+    <svg width="28" height="32" viewBox="0 0 28 32" fill="none">
+      <path d="M2 1.5L26.5 16L2 30.5V1.5Z" fill="#d4a055" stroke="#d4a055" stroke-width="2"/>
+    </svg>
+  </button>
+  <p class="tap-hint">Tap to begin</p>
+</div>
+
+<!-- Scroll Progress -->
+<div id="progress"></div>
+
+<!-- Floating Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Audio Toggle -->
+<button id="audioToggle" aria-label="Toggle Music">
+  <svg id="audioIcon" width="22" height="22" viewBox="0 0 24 24">
+    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0012 8.5v1.5a3 3 0 010 4V15.5a4.5 4.5 0 004.5-3.5zM14 3.23v2.06a7 7 0 010 13.42v2.06A9 9 0 0014 3.23z"/>
+  </svg>
+</button>
+
+<!-- ═══ SECTIONS ═══ -->
+
+<!-- Hero -->
+<section id="hero" class="section">
+  <div class="hero-content">
+    <h1>Happy Birthday<br>Mum</h1>
+    <div class="divider"></div>
+    <p class="hero-year">2 0 2 6</p>
+  </div>
+</section>
+
+<!-- Photo 1 — Glam shot -->
+<section class="section photo-section">
+  <div class="photo-frame">
+    <img src="media/photo1.jpeg" alt="Mum looking gorgeous" loading="lazy">
+    <div class="caption">Forever stunning, forever radiant</div>
+  </div>
+</section>
+
+<!-- Video 1 -->
+<section class="section video-section">
+  <div class="video-frame">
+    <video src="media/video1.mp4" muted playsinline preload="metadata"></video>
+  </div>
+</section>
+
+<!-- Text -->
+<section class="section text-section">
+  <p class="message">Every moment with you is a blessing we treasure forever...</p>
+</section>
+
+<!-- Photo 2 — Celebration -->
+<section class="section photo-section">
+  <div class="photo-frame">
+    <img src="media/photo2.jpeg" alt="Mum at celebration" loading="lazy">
+    <div class="caption">Grace and elegance, always</div>
+  </div>
+</section>
+
+<!-- Video 2 -->
+<section class="section video-section">
+  <div class="video-frame">
+    <video src="media/video2.mp4" muted playsinline preload="metadata"></video>
+  </div>
+</section>
+
+<!-- Photo 3 — With flowers -->
+<section class="section photo-section">
+  <div class="photo-frame">
+    <img src="media/photo3.jpeg" alt="Mum with flowers" loading="lazy">
+    <div class="caption">Beautiful inside and out</div>
+  </div>
+</section>
+
+<!-- Text -->
+<section class="section text-section">
+  <p class="message">Your love lights up every room you walk into...</p>
+</section>
+
+<!-- Video 3 -->
+<section class="section video-section">
+  <div class="video-frame">
+    <video src="media/video3.mp4" muted playsinline preload="metadata"></video>
+  </div>
+</section>
+
+<!-- Photo 4 — Smiling with family -->
+<section class="section photo-section">
+  <div class="photo-frame">
+    <img src="media/photo4.jpeg" alt="Mum's beautiful smile" loading="lazy">
+    <div class="caption">That smile that warms every heart</div>
+  </div>
+</section>
+
+<!-- Finale -->
+<section id="finale" class="section">
+  <div class="finale-text">
+    <h2>Happy Birthday, Mum!</h2>
+    <div class="divider"></div>
+    <p>
+      Thank you for being the most amazing, loving, and
+      beautiful mother in the world. Today we celebrate
+      you and everything you mean to us.
+    </p>
+    <p class="hearts">&#x2764;</p>
+  </div>
+</section>
+
+<script>
+// ── Audio: Synthesized "Happy Birthday" melody ──
+let audioCtx, isPlaying = false, gainNode;
+
+function createAudio() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  gainNode = audioCtx.createGain();
+  gainNode.gain.value = 0.18;
+  gainNode.connect(audioCtx.destination);
+}
+
+// Happy Birthday notes (frequency, duration in beats)
+const NOTES = [
+  // "Happy birthday to you"
+  [262, 0.75], [262, 0.25], [294, 1], [262, 1], [349, 1], [330, 2],
+  // "Happy birthday to you"
+  [262, 0.75], [262, 0.25], [294, 1], [262, 1], [392, 1], [349, 2],
+  // "Happy birthday dear Mum"
+  [262, 0.75], [262, 0.25], [523, 1], [440, 1], [349, 1], [330, 1], [294, 2],
+  // "Happy birthday to you"
+  [466, 0.75], [466, 0.25], [440, 1], [349, 1], [392, 1], [349, 2],
+];
+
+let melodyTimeout;
+
+function playMelody() {
+  if (!audioCtx) createAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  const tempo = 0.45; // seconds per beat
+  let time = audioCtx.currentTime + 0.1;
+
+  NOTES.forEach(([freq, dur]) => {
+    const osc = audioCtx.createOscillator();
+    const noteGain = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+
+    // Add slight vibrato
+    const vibrato = audioCtx.createOscillator();
+    const vibratoGain = audioCtx.createGain();
+    vibrato.frequency.value = 5;
+    vibratoGain.gain.value = 2;
+    vibrato.connect(vibratoGain);
+    vibratoGain.connect(osc.frequency);
+    vibrato.start(time);
+    vibrato.stop(time + dur * tempo);
+
+    noteGain.gain.setValueAtTime(0, time);
+    noteGain.gain.linearRampToValueAtTime(0.5, time + 0.05);
+    noteGain.gain.exponentialRampToValueAtTime(0.01, time + dur * tempo - 0.05);
+
+    osc.connect(noteGain);
+    noteGain.connect(gainNode);
+
+    osc.start(time);
+    osc.stop(time + dur * tempo);
+
+    time += dur * tempo;
+  });
+
+  // Loop
+  const totalDuration = NOTES.reduce((sum, [, d]) => sum + d, 0) * tempo;
+  melodyTimeout = setTimeout(() => {
+    if (isPlaying) playMelody();
+  }, totalDuration * 1000 + 500);
+}
+
+function toggleAudio() {
+  if (isPlaying) {
+    isPlaying = false;
+    clearTimeout(melodyTimeout);
+    if (gainNode) gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+    document.getElementById('audioIcon').innerHTML =
+      '<path d="M16.5 12A4.5 4.5 0 0012 8.5v1.5a3 3 0 010 4V15.5a4.5 4.5 0 004.5-3.5zM14 3.23v2.06a7 7 0 010 13.42v2.06A9 9 0 0014 3.23z"/>' +
+      '<line x1="3" y1="3" x2="21" y2="21" stroke="#d4a055" stroke-width="2"/>';
+  } else {
+    isPlaying = true;
+    if (gainNode) gainNode.gain.value = 0.18;
+    playMelody();
+    document.getElementById('audioIcon').innerHTML =
+      '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0012 8.5v1.5a3 3 0 010 4V15.5a4.5 4.5 0 004.5-3.5zM14 3.23v2.06a7 7 0 010 13.42v2.06A9 9 0 0014 3.23z"/>';
+  }
+}
+
+// ── Splash ──
+document.getElementById('splash').addEventListener('click', () => {
+  document.getElementById('splash').classList.add('hidden');
+  document.getElementById('audioToggle').classList.add('show');
+  isPlaying = true;
+  playMelody();
+  // Trigger hero animation
+  setTimeout(() => {
+    document.querySelector('.hero-content').classList.add('visible');
+  }, 400);
+});
+
+document.getElementById('audioToggle').addEventListener('click', toggleAudio);
+
+// ── Scroll Observer ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Animate element in
+      const el = entry.target.querySelector('.photo-frame, .video-frame, .message, .finale-text, .hearts');
+      if (el) el.classList.add('visible');
+
+      // Auto-play videos when in view
+      const video = entry.target.querySelector('video');
+      if (video && entry.intersectionRatio > 0.5) {
+        video.play().catch(() => {});
+      }
+    } else {
+      // Pause videos when out of view
+      const video = entry.target.querySelector('video');
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    }
+  });
+}, { threshold: [0, 0.5] });
+
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+// ── Scroll Progress ──
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('progress').style.width = (scrolled / total * 100) + '%';
+});
+
+// ── Floating Particles ──
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 15) + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 4) + 'px';
+    container.appendChild(p);
+  }
+}
+createParticles();
+</script>
+
+</body>
+</html>
